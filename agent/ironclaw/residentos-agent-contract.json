@@ -1,0 +1,43 @@
+{
+  "seller_id_default": "demo-seller",
+  "telegram_bot_username": "locallebot",
+  "skills": [
+    "agent/skills/residentos_onboarding/SKILL.md",
+    "agent/skills/payment_verify/SKILL.md",
+    "agent/skills/order_manage/SKILL.md",
+    "agent/skills/delivery_notify/SKILL.md"
+  ],
+  "insforge_edge_functions": {
+    "record_payment_verification": {
+      "caller": "payment_verify",
+      "required": true
+    },
+    "generate_manifest": {
+      "caller": "order_manage",
+      "required": true
+    },
+    "update_delivery_status": {
+      "caller": "dashboard_or_agent",
+      "required": true
+    }
+  },
+  "agent_events_consumed": [
+    "delivery_updated"
+  ],
+  "artifact_prefixes": [
+    "payment-receipts/",
+    "order-manifests/",
+    "delivery-confirmations/",
+    "seller-assets/"
+  ],
+  "receipt_fixture": {
+    "path": "/home/andrew/Downloads/IMG_3195.png",
+    "recipient_name": "Cristian Rosca",
+    "recipient_email": "rosca.cris18@gmail.com",
+    "amount": "$5.00",
+    "date": "May 31, 2026",
+    "confirmation_number": "g2cwdpnn1",
+    "state": "payment_sent"
+  }
+}
+

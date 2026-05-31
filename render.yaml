@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: residentos-dashboard
+    runtime: node
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: DEMO_MODE
+        value: "true"
+      - key: RESIDENTOS_SELLER_ID
+        value: demo-seller
+      - key: RESIDENTOS_ZELLE_RECIPIENT_NAME
+        value: Cristian Rosca
+      - key: RESIDENTOS_ZELLE_RECIPIENT_EMAIL
+        value: rosca.cris18@gmail.com
+      - key: INSFORGE_URL
+        sync: false
+      - key: INSFORGE_API_KEY
+        sync: false
+      - key: INSFORGE_ANON_KEY
+        sync: false
+      - key: AWS_S3_BUCKET
+        value: residentos-artifacts
+      - key: AWS_ENDPOINT_URL_S3
+        sync: false
+      - key: AWS_REGION
+        value: auto
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: NEAR_AI_BASE_URL
+        sync: false
+      - key: NEAR_AI_API_KEY
+        sync: false
+      - key: NEAR_AI_MODEL
+        sync: false

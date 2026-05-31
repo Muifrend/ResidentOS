@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ResidentOS Ops</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">ResidentOS</p>
+        <h1>Building Operations</h1>
+      </div>
+      <div class="status-pill" id="connectionStatus">Connecting</div>
+    </header>
+
+    <main class="shell">
+      <section class="ops-grid" aria-label="Summary">
+        <article class="metric">
+          <span>Paid subscribers</span>
+          <strong id="paidCount">0</strong>
+        </article>
+        <article class="metric">
+          <span>Weekly revenue</span>
+          <strong id="weeklyRevenue">$0</strong>
+        </article>
+        <article class="metric">
+          <span>Flagged payments</span>
+          <strong id="flaggedCount">0</strong>
+        </article>
+        <article class="metric">
+          <span>Open deliveries</span>
+          <strong id="openDeliveries">0</strong>
+        </article>
+      </section>
+
+      <section class="dashboard">
+        <aside class="panel event-panel">
+          <div class="section-title">
+            <div>
+              <p class="eyebrow">Ops Home</p>
+              <h2>Agent stream</h2>
+            </div>
+            <button class="icon-button" id="refreshButton" title="Refresh dashboard">
+              Refresh
+            </button>
+          </div>
+          <div id="sourceNotice" class="notice"></div>
+          <ol class="event-list" id="eventList"></ol>
+        </aside>
+
+        <div class="main-stack">
+          <section class="panel">
+            <div class="section-title">
+              <div>
+                <p class="eyebrow">Subscribers</p>
+                <h2>Roster</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Unit</th>
+                    <th>Tier</th>
+                    <th>Telegram</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="subscriberRows"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel split">
+            <div>
+              <div class="section-title">
+                <div>
+                  <p class="eyebrow">Payments</p>
+                  <h2>Verification</h2>
+                </div>
+              </div>
+              <div class="payment-list" id="paymentList"></div>
+            </div>
+
+            <div>
+              <div class="section-title">
+                <div>
+                  <p class="eyebrow">Manifest</p>
+                  <h2>Delivery list</h2>
+                </div>
+                <button id="generateManifest" class="primary-button">
+                  Generate
+                </button>
+              </div>
+              <div class="manifest-list" id="manifestList"></div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

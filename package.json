@@ -1,4 +1,17 @@
 {
+  "name": "residentos",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ResidentOS hackathon dashboard and API facade.",
+  "scripts": {
+    "dev": "node src/server.js",
+    "start": "node src/server.js",
+    "build": "node --check src/config.js && node --check src/insforge.js && node --check src/server.js && node --check src/tigris.js && node --check public/app.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1057.0",
     "@aws-sdk/s3-request-presigner": "^3.1057.0",

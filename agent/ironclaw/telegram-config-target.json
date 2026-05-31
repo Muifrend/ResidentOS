@@ -1,0 +1,15 @@
+{
+  "channel": "telegram",
+  "bot_username": "locallebot",
+  "preferred_demo_config": {
+    "dm_policy": "open",
+    "polling_enabled": true,
+    "poll_interval_ms": 30000
+  },
+  "fallback_config": {
+    "dm_policy": "pairing",
+    "prepair_demo_accounts": true,
+    "note": "Use this when the deployed IronClaw Telegram WASM channel requires paired DMs."
+  }
+}
+
