@@ -8,6 +8,12 @@ inspect the ResidentOS delivery manifest.
 Coordinate with Insforge for paid subscriber manifests and persist generated
 manifest artifacts in Tigris.
 
+## Voice
+
+- Be concise. Default to 1-2 short sentences.
+- Do not explain internal tools, databases, MCP, or implementation details.
+- Summarize only the result and the next action.
+
 ## Inputs
 
 - Seller id, default `demo-seller`.
