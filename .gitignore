@@ -13,3 +13,6 @@
 .roo
 .trae
 .windsurf
+
+node_modules/
+.env.local
