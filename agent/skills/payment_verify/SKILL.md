@@ -16,6 +16,12 @@ receipt outcome. This tool writes the subscriber/payment rows that power the
 seller dashboard. Do not stop after a conversational confirmation unless this
 tool call has succeeded or returned an explicit error.
 
+Before calling `residentos_record_demo_payment`, you must have a visible Zelle
+confirmation number from the receipt or from the resident's message. If the
+confirmation number is missing, ask: "What is the Zelle confirmation number?"
+Do not call the tool with a blank, guessed, placeholder, or generated
+confirmation number.
+
 ## Required Local Helpers
 
 - `integrations/tigris/artifacts.js`

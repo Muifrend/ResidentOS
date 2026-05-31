@@ -130,6 +130,86 @@ function textToolResult(payload) {
   };
 }
 
+function normalizeTierId(value) {
+  const text = String(value || "weekly-5").trim().toLowerCase();
+
+  if (text === "demo-bowl" || text === "$5" || text === "5" || text.includes("demo")) {
+    return "weekly-5";
+  }
+
+  return text;
+}
+
+function normalizePaymentState(value) {
+  const text = String(value || "").trim().toLowerCase();
+
+  if (text === "verified" || text === "paid" || text.includes("sent")) {
+    return "payment_sent";
+  }
+
+  return text || "payment_sent";
+}
+
+function normalizeRecordPaymentArgs(args = {}) {
+  const subscriber = args.subscriber || {};
+  const payment = args.payment || {};
+  const confirmationNumber =
+    payment.confirmation_number ||
+    payment.confirmationNumber ||
+    args.confirmation_number ||
+    args.confirmationNumber;
+
+  if (!confirmationNumber) {
+    const error = new Error(
+      "confirmation_number is required. Ask the resident for the Zelle confirmation number before calling this tool.",
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const tierId = normalizeTierId(
+    subscriber.tier_id || subscriber.tierid || args.tier_id || args.tierid,
+  );
+
+  return {
+    seller_id: args.seller_id || args.sellerid || config.sellerId,
+    subscriber: {
+      telegram_chat_id: subscriber.telegram_chat_id || subscriber.telegramChatId || "",
+      telegram_handle: subscriber.telegram_handle || subscriber.telegramHandle || "",
+      name: subscriber.name || "Resident",
+      unit: subscriber.unit || subscriber.room || "",
+      floor: subscriber.floor || "",
+      tier_id: tierId,
+    },
+    amount: payment.amount || args.amount || "$5.00",
+    confidence: payment.confidence || args.confidence || 0.95,
+    confirmation_number: String(confirmationNumber).trim(),
+    receipt_artifact_key:
+      payment.receipt_artifact_key ||
+      payment.receiptArtifactKey ||
+      args.receipt_artifact_key ||
+      null,
+    extracted_fields: {
+      recipient_name: payment.recipient_name || payment.recipientName || config.zelleRecipientName,
+      recipient_email:
+        payment.recipient_email || payment.recipientEmail || config.zelleRecipientEmail,
+      amount: payment.amount || args.amount || "$5.00",
+      date: payment.date || args.date || new Date().toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      }),
+      confirmation_number: String(confirmationNumber).trim(),
+      state: normalizePaymentState(payment.state || args.state),
+      confidence: payment.confidence || args.confidence || 0.95,
+    },
+    raw_extraction: {
+      source: "residentos_mcp",
+      provided_by_agent: true,
+    },
+  };
+}
+
 const mcpTools = [
   {
     name: "residentos_dashboard_state",
@@ -153,7 +233,7 @@ const mcpTools = [
   {
     name: "residentos_record_demo_payment",
     description:
-      "Record a ResidentOS demo subscriber/payment after Telegram onboarding and receipt verification.",
+      "Record a ResidentOS demo subscriber/payment after Telegram onboarding. Requires the Zelle confirmation number.",
     inputSchema: {
       type: "object",
       properties: {
@@ -180,10 +260,11 @@ const mcpTools = [
             confidence: { type: "number" },
             receipt_artifact_key: { type: "string" },
           },
+          required: ["confirmation_number"],
           additionalProperties: true,
         },
       },
-      required: ["subscriber"],
+      required: ["subscriber", "payment"],
       additionalProperties: true,
     },
   },
@@ -211,10 +292,10 @@ async function callMcpTool(name, args = {}) {
       return textToolResult(payload);
     }
     case "residentos_record_demo_payment": {
-      const payload = await invokeResidentFunction("demo_replay_receipt", {
-        seller_id: config.sellerId,
-        ...args,
-      });
+      const payload = await invokeResidentFunction(
+        "record_payment_verification",
+        normalizeRecordPaymentArgs(args),
+      );
       invalidateDashboardCache();
       return textToolResult(payload);
     }
