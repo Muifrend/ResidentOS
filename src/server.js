@@ -8,6 +8,12 @@ import { createPresignedArtifactUrl } from "./tigris.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const publicDir = path.join(__dirname, "..", "public");
+const dashboardCache = {
+  ttlMs: 15000,
+  data: null,
+  expiresAt: 0,
+  pending: null,
+};
 
 const contentTypes = {
   ".html": "text/html; charset=utf-8",
@@ -79,32 +85,69 @@ async function serveStatic(req, res, pathname) {
   }
 }
 
+async function getCachedDashboardState() {
+  const now = Date.now();
+
+  if (dashboardCache.data && dashboardCache.expiresAt > now) {
+    return dashboardCache.data;
+  }
+
+  if (!dashboardCache.pending) {
+    dashboardCache.pending = getDashboardState()
+      .then((state) => {
+        dashboardCache.data = state;
+        dashboardCache.expiresAt = Date.now() + dashboardCache.ttlMs;
+        return state;
+      })
+      .finally(() => {
+        dashboardCache.pending = null;
+      });
+  }
+
+  return dashboardCache.pending;
+}
+
+function invalidateDashboardCache() {
+  dashboardCache.expiresAt = 0;
+}
+
 async function handleAction(req, res, action) {
   const body = await readBody(req);
+  let payload;
 
   switch (action) {
     case "generate-manifest":
-      sendJson(res, 200, await invokeResidentFunction("generate_manifest", body));
+      payload = await invokeResidentFunction("generate_manifest", body);
+      invalidateDashboardCache();
+      sendJson(res, 200, payload);
       return;
     case "delivery-status":
-      sendJson(res, 200, await invokeResidentFunction("update_delivery_status", body));
+      payload = await invokeResidentFunction("update_delivery_status", body);
+      invalidateDashboardCache();
+      sendJson(res, 200, payload);
       return;
     case "review-payment":
-      sendJson(res, 200, await invokeResidentFunction("review_flagged_payment", body));
+      payload = await invokeResidentFunction("review_flagged_payment", body);
+      invalidateDashboardCache();
+      sendJson(res, 200, payload);
       return;
     case "demo-seed":
       if (!config.demoMode) {
         notFound(res);
         return;
       }
-      sendJson(res, 200, await invokeResidentFunction("demo_seed", body));
+      payload = await invokeResidentFunction("demo_seed", body);
+      invalidateDashboardCache();
+      sendJson(res, 200, payload);
       return;
     case "demo-replay-receipt":
       if (!config.demoMode) {
         notFound(res);
         return;
       }
-      sendJson(res, 200, await invokeResidentFunction("demo_replay_receipt", body));
+      payload = await invokeResidentFunction("demo_replay_receipt", body);
+      invalidateDashboardCache();
+      sendJson(res, 200, payload);
       return;
     default:
       notFound(res);
@@ -120,7 +163,7 @@ async function handleEvents(req, res) {
 
   const push = async () => {
     try {
-      const state = await getDashboardState();
+      const state = await getCachedDashboardState();
       res.write("event: dashboard\n");
       res.write(`data: ${JSON.stringify(state)}\n\n`);
     } catch (error) {
@@ -130,7 +173,7 @@ async function handleEvents(req, res) {
   };
 
   await push();
-  const interval = setInterval(push, 3000);
+  const interval = setInterval(push, dashboardCache.ttlMs);
 
   req.on("close", () => {
     clearInterval(interval);
@@ -151,7 +194,7 @@ async function route(req, res) {
   }
 
   if (req.method === "GET" && pathname === "/api/dashboard") {
-    sendJson(res, 200, await getDashboardState());
+    sendJson(res, 200, await getCachedDashboardState());
     return;
   }
 
