@@ -212,7 +212,9 @@ export async function getDashboardState() {
         selectRows("subscribers", (query) => query.eq("seller_id", config.sellerId)),
       ),
       read(sampleState.payments, () =>
-        selectRows("payments", (query) => query.eq("seller_id", config.sellerId)),
+        selectRows("payments", (query) =>
+          query.eq("seller_id", config.sellerId).order("created_at", { ascending: false }),
+        ),
       ),
       read(sampleState.orders, () =>
         selectRows("orders", (query) =>

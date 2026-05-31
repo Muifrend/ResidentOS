@@ -70,6 +70,14 @@ function getTier(id) {
   return state.tiersById.get(id) || {};
 }
 
+function newestFirst(items) {
+  return [...(items || [])].sort((a, b) => {
+    const left = new Date(a.created_at || a.updated_at || 0).getTime();
+    const right = new Date(b.created_at || b.updated_at || 0).getTime();
+    return right - left;
+  });
+}
+
 function deriveMetrics(data) {
   const paidSubscribers = data.subscribers.filter((subscriber) => {
     const status = subscriber.payment_status || subscriber.status;
@@ -109,7 +117,7 @@ function renderSourceNotice(data) {
 }
 
 function renderEvents(data) {
-  const events = data.agent_events || [];
+  const events = newestFirst(data.agent_events);
 
   els.eventList.innerHTML = events.length
     ? events
@@ -167,8 +175,10 @@ function paymentFields(payment) {
 }
 
 function renderPayments(data) {
-  els.paymentList.innerHTML = data.payments.length
-    ? data.payments
+  const payments = newestFirst(data.payments);
+
+  els.paymentList.innerHTML = payments.length
+    ? payments
         .map((payment) => {
           const subscriber = getSubscriber(payment.subscriber_id);
           const flagged = String(payment.status).toLowerCase() === "flagged";
