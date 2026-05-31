@@ -8,6 +8,14 @@ Store the original receipt privately in Tigris, extract receipt fields with
 NEAR AI, validate the fixture values, and call Insforge
 `record_payment_verification`.
 
+## Required Action Tool
+
+When the ResidentOS MCP server is available, you must call
+`residentos_record_demo_payment` after collecting the subscriber profile and
+receipt outcome. This tool writes the subscriber/payment rows that power the
+seller dashboard. Do not stop after a conversational confirmation unless this
+tool call has succeeded or returned an explicit error.
+
 ## Required Local Helpers
 
 - `integrations/tigris/artifacts.js`
@@ -68,7 +76,7 @@ payload.
 
 ## Insforge Edge Function Payload
 
-Call `record_payment_verification` with:
+Call `residentos_record_demo_payment` with this shape:
 
 ```json
 {

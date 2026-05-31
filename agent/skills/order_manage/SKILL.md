@@ -16,7 +16,7 @@ manifest artifacts in Tigris.
 
 ## Flow
 
-1. Call Insforge edge function `generate_manifest`.
+1. Call the ResidentOS MCP tool `residentos_generate_manifest`.
 2. Expect a sorted list by floor, then unit.
 3. Persist the returned manifest JSON to Tigris:
 
@@ -53,4 +53,3 @@ order-manifests/{seller_id}/{date}.json
 - Do not compute paid status locally. Insforge is the source of truth.
 - Do not write dashboard files.
 - Do not expose Tigris artifacts publicly.
-

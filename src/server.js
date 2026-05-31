@@ -31,6 +31,14 @@ function sendJson(res, statusCode, payload) {
   res.end(JSON.stringify(payload));
 }
 
+function sendMcp(res, id, result) {
+  sendJson(res, 200, {
+    jsonrpc: "2.0",
+    id,
+    result,
+  });
+}
+
 function notFound(res) {
   sendJson(res, 404, { error: "Not found" });
 }
@@ -109,6 +117,159 @@ async function getCachedDashboardState() {
 
 function invalidateDashboardCache() {
   dashboardCache.expiresAt = 0;
+}
+
+function textToolResult(payload) {
+  return {
+    content: [
+      {
+        type: "text",
+        text: JSON.stringify(payload),
+      },
+    ],
+  };
+}
+
+const mcpTools = [
+  {
+    name: "residentos_dashboard_state",
+    description: "Read the current ResidentOS seller dashboard state.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+      additionalProperties: false,
+    },
+  },
+  {
+    name: "residentos_demo_seed",
+    description:
+      "Seed the ResidentOS demo seller, tiers, sample subscribers, and sample payments.",
+    inputSchema: {
+      type: "object",
+      properties: {},
+      additionalProperties: true,
+    },
+  },
+  {
+    name: "residentos_record_demo_payment",
+    description:
+      "Record a ResidentOS demo subscriber/payment after Telegram onboarding and receipt verification.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        seller_id: { type: "string" },
+        subscriber: {
+          type: "object",
+          properties: {
+            telegram_chat_id: { type: "string" },
+            telegram_handle: { type: "string" },
+            name: { type: "string" },
+            unit: { type: "string" },
+            floor: { type: "string" },
+            tier_id: { type: "string" },
+          },
+          required: ["name", "unit", "floor"],
+          additionalProperties: true,
+        },
+        payment: {
+          type: "object",
+          properties: {
+            amount: { type: "string" },
+            confirmation_number: { type: "string" },
+            state: { type: "string" },
+            confidence: { type: "number" },
+            receipt_artifact_key: { type: "string" },
+          },
+          additionalProperties: true,
+        },
+      },
+      required: ["subscriber"],
+      additionalProperties: true,
+    },
+  },
+  {
+    name: "residentos_generate_manifest",
+    description: "Generate the ResidentOS delivery manifest from paid subscribers.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        seller_id: { type: "string" },
+        manifest_date: { type: "string" },
+      },
+      additionalProperties: true,
+    },
+  },
+];
+
+async function callMcpTool(name, args = {}) {
+  switch (name) {
+    case "residentos_dashboard_state":
+      return textToolResult(await getCachedDashboardState());
+    case "residentos_demo_seed": {
+      const payload = await invokeResidentFunction("demo_seed", args);
+      invalidateDashboardCache();
+      return textToolResult(payload);
+    }
+    case "residentos_record_demo_payment": {
+      const payload = await invokeResidentFunction("demo_replay_receipt", {
+        seller_id: config.sellerId,
+        ...args,
+      });
+      invalidateDashboardCache();
+      return textToolResult(payload);
+    }
+    case "residentos_generate_manifest": {
+      const payload = await invokeResidentFunction("generate_manifest", args);
+      invalidateDashboardCache();
+      return textToolResult(payload);
+    }
+    default:
+      throw new Error(`Unknown ResidentOS MCP tool: ${name}`);
+  }
+}
+
+async function handleMcp(req, res) {
+  const message = await readBody(req);
+  const method = message?.method;
+  const params = message?.params || {};
+
+  if (method === "initialize") {
+    sendMcp(res, message.id, {
+      protocolVersion: "2024-11-05",
+      capabilities: {
+        tools: {},
+      },
+      serverInfo: {
+        name: "residentos",
+        version: "0.1.0",
+      },
+    });
+    return;
+  }
+
+  if (method === "notifications/initialized") {
+    sendJson(res, 202, {});
+    return;
+  }
+
+  if (method === "tools/list") {
+    sendMcp(res, message.id, { tools: mcpTools });
+    return;
+  }
+
+  if (method === "tools/call") {
+    sendMcp(res, message.id, await callMcpTool(params.name, params.arguments));
+    return;
+  }
+
+  sendJson(res, 400, {
+    jsonrpc: "2.0",
+    id: message?.id ?? null,
+    error: {
+      code: -32601,
+      message: `Unsupported MCP method: ${method}`,
+    },
+  });
 }
 
 async function handleAction(req, res, action) {
@@ -200,6 +361,11 @@ async function route(req, res) {
 
   if (req.method === "GET" && pathname === "/api/events") {
     await handleEvents(req, res);
+    return;
+  }
+
+  if (req.method === "POST" && pathname === "/mcp") {
+    await handleMcp(req, res);
     return;
   }
 

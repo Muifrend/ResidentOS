@@ -61,8 +61,8 @@ AWS_SECRET_ACCESS_KEY=...
 5. Judge sends the Zelle screenshot.
 6. `payment_verify` uploads the screenshot to Tigris under
    `payment-receipts/`.
-7. `payment_verify` extracts receipt fields with NEAR AI and calls Insforge
-   `record_payment_verification`.
+7. `payment_verify` extracts receipt fields with NEAR AI and calls the
+   ResidentOS MCP tool `residentos_record_demo_payment` to write Insforge rows.
 8. Bot confirms paid or flagged status.
 9. Seller generates the manifest from the dashboard or agent flow.
 10. `delivery_notify` sends delivery progress to the resident chat.
@@ -101,4 +101,12 @@ must not print secrets.
 ssh -i ~/Downloads/agent-private-key.pem -p 21981 agent@baremetal3.agents.near.ai 'ironclaw --version'
 ssh -i ~/Downloads/agent-private-key.pem -p 21981 agent@baremetal3.agents.near.ai 'ironclaw channels list --json'
 ssh -i ~/Downloads/agent-private-key.pem -p 21981 agent@baremetal3.agents.near.ai 'ironclaw channels list --verbose'
+```
+
+The deployed IronClaw runtime must also have the ResidentOS MCP server
+registered:
+
+```bash
+ironclaw mcp add residentos https://residentos.onrender.com/mcp --description "ResidentOS dashboard write tools"
+ironclaw mcp test residentos
 ```
