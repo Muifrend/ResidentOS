@@ -1,8 +1,3 @@
----
-name: order_manage
-description: Generate and summarize ResidentOS delivery manifests through the ResidentOS MCP tool.
----
-
 # ResidentOS Order Management
 
 Use this skill when the seller or scheduled agent workflow needs to generate or

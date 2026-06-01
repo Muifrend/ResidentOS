@@ -1,8 +1,3 @@
----
-name: residentos_onboarding
-description: Collect ResidentOS subscriber profile details in Telegram and hand off to payment verification.
----
-
 # ResidentOS Onboarding
 
 Use this skill when a Telegram user starts the ResidentOS demo flow with `/start`

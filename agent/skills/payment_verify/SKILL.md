@@ -1,8 +1,3 @@
----
-name: payment_verify
-description: Verify ResidentOS Zelle receipts and write subscriber/payment rows through the ResidentOS MCP tool.
----
-
 # ResidentOS Payment Verification
 
 Use this skill after onboarding when a resident sends a Zelle receipt screenshot.

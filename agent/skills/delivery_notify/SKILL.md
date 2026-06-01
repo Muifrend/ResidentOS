@@ -1,8 +1,3 @@
----
-name: delivery_notify
-description: Send concise ResidentOS delivery progress updates to residents.
----
-
 # ResidentOS Delivery Notify
 
 Use this skill when Insforge or the dashboard reports delivery progress.
