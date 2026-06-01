@@ -7,12 +7,6 @@ Use this skill when Insforge or the dashboard reports delivery progress.
 Notify residents in Telegram when their floor or order is dispatched or
 delivered.
 
-## Voice
-
-- Be concise. Default to 1 short sentence.
-- Do not explain internal tools, databases, MCP, or implementation details.
-- Give only the delivery status and what to do if there is a problem.
-
 ## Event Inputs
 
 Listen for Insforge `agent_events` or direct workflow calls with:
@@ -60,3 +54,4 @@ Your ResidentOS order was marked delivered. Reply here if anything looks off.
 If `locallebot` remains in IronClaw pairing mode, notifications only work for
 paired demo chats. Pre-pair judge accounts before the live demo or switch the
 Telegram channel to open DM mode if the deployed IronClaw runtime supports it.
+

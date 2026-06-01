@@ -8,13 +8,6 @@ or asks to subscribe to the seller's weekly order.
 Collect the minimum subscriber profile needed by the ResidentOS backend, then
 hand off to the payment verification flow.
 
-## Voice
-
-- Be concise. Default to 1-2 short sentences.
-- Ask only one question at a time.
-- Do not explain internal tools, databases, MCP, or implementation details.
-- Do not repeat information the resident already gave.
-
 ## Runtime Inputs
 
 - Telegram message text and metadata.
@@ -63,3 +56,4 @@ Pass this shape to the payment step and eventually to Insforge
   profile fields before verification.
 - If Telegram is still in pairing mode, tell the judge to complete the pairing
   step first, then continue this flow in the same chat.
+

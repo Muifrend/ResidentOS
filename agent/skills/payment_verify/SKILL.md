@@ -8,13 +8,6 @@ Store the original receipt privately in Tigris, extract receipt fields with
 NEAR AI, validate the fixture values, and call Insforge
 `record_payment_verification`.
 
-## Voice
-
-- Be concise. Default to 1-2 short sentences.
-- Ask only one question at a time.
-- Do not explain internal tools, databases, MCP, or implementation details.
-- Do not say a payment is recorded until the ResidentOS tool call succeeds.
-
 ## Required Action Tool
 
 When the ResidentOS MCP server is available, you must call
