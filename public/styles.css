@@ -374,6 +374,14 @@ td {
   background: #fff;
 }
 
+.primary-button:disabled,
+.secondary-button:disabled,
+.icon-button:disabled {
+  cursor: not-allowed;
+  color: var(--muted);
+  background: #f3f4f6;
+}
+
 .secondary-button.reject {
   color: var(--red);
 }

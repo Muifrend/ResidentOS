@@ -182,6 +182,7 @@ function renderPayments(data) {
         .map((payment) => {
           const subscriber = getSubscriber(payment.subscriber_id);
           const flagged = String(payment.status).toLowerCase() === "flagged";
+          const receiptKey = payment.receipt_artifact_key || "";
 
           return `
             <article class="payment-card">
@@ -194,7 +195,11 @@ function renderPayments(data) {
               </div>
               <div class="field-grid">${paymentFields(payment)}</div>
               <div class="actions">
-                <button class="secondary-button" data-preview="${escapeHtml(payment.receipt_artifact_key || "")}">Preview</button>
+                ${
+                  receiptKey
+                    ? `<button class="secondary-button" data-preview="${escapeHtml(receiptKey)}">Preview</button>`
+                    : `<button class="secondary-button" disabled>No receipt</button>`
+                }
                 ${
                   flagged
                     ? `<button class="primary-button" data-review="${escapeHtml(payment.id)}" data-decision="approved">Approve</button>
@@ -207,6 +212,33 @@ function renderPayments(data) {
         })
         .join("")
     : `<div class="empty">No payments received yet.</div>`;
+}
+
+async function openArtifactPreview(key) {
+  if (!key) {
+    showToast("No receipt is attached to this payment.");
+    return;
+  }
+
+  const previewWindow = window.open("about:blank", "_blank");
+  if (!previewWindow) {
+    throw new Error("Preview was blocked by the browser. Allow popups and try again.");
+  }
+
+  previewWindow.opener = null;
+  previewWindow.document.title = "Receipt preview";
+  previewWindow.document.body.textContent = "Loading receipt preview...";
+
+  try {
+    const params = new URLSearchParams({ key });
+    const response = await fetch(`/api/artifacts/presign?${params}`);
+    const payload = await response.json();
+    if (!response.ok) throw new Error(payload.error || "Preview unavailable.");
+    previewWindow.location.href = payload.url;
+  } catch (error) {
+    previewWindow.close();
+    throw error;
+  }
 }
 
 function renderManifest(data) {
@@ -330,12 +362,8 @@ document.addEventListener("click", async (event) => {
       showToast(`Delivery marked ${target.dataset.status}.`);
     }
 
-    if (target.dataset.preview) {
-      const params = new URLSearchParams({ key: target.dataset.preview });
-      const response = await fetch(`/api/artifacts/presign?${params}`);
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || "Preview unavailable.");
-      window.open(payload.url, "_blank", "noopener,noreferrer");
+    if ("preview" in target.dataset) {
+      await openArtifactPreview(target.dataset.preview);
     }
   } catch (error) {
     showToast(error.message);
